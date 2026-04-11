@@ -1,0 +1,2 @@
+[{,**/}resources/*.{cmb,ui,xml}]
+indent_size = 2

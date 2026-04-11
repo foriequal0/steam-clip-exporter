@@ -1,0 +1,25 @@
+[package]
+name = "steam-clip-exporter"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+adw = { workspace = true }
+gtk = { workspace = true }
+exporter-core = { path = "./crates/core" }
+xdg = { workspace = true }
+
+[build-dependencies]
+glib-build-tools = { workspace = true }
+
+[workspace]
+members = [
+    "crates/core",
+]
+
+[workspace.dependencies]
+adw = { version = "0.9.1", package = "libadwaita", features = ["v1_8"] }
+gtk = { version = "0.11.1", package = "gtk4", features = ["v4_12"] }
+glib = { version = "0.22.3" }
+glib-build-tools = "0.22.0"
+xdg = "3.0.0"

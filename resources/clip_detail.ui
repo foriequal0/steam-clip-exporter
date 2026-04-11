@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 1.0 -->
+<interface>
+  <!-- interface-name clip_detail.ui -->
+  <requires lib="gtk" version="4.10"/>
+  <requires lib="libadwaita" version="1.0"/>
+  <template class="SceClipDetail" parent="GtkBox">
+    <child>
+      <object class="AdwToastOverlay" id="toast_overlay">
+        <child>
+          <object class="AdwClampScrollable">
+            <child>
+              <object class="AdwPreferencesPage">
+                <child>
+                  <object class="AdwPreferencesGroup" id="group">
+                    <property name="description">$DATETIME ($RELATIVE)</property>
+                    <property name="header-suffix">
+                      <object class="GtkButton">
+                        <property name="label">Export</property>
+                        <property name="valign">end</property>
+                        <signal name="clicked" handler="handle_export" swapped="True"/>
+                      </object>
+                    </property>
+                    <property name="title">$TITLE</property>
+                    <child>
+                      <object class="AdwPreferencesRow">
+                        <child>
+                          <object class="AdwBin" id="thumbnail_bin">
+                            <property name="margin-bottom">12</property>
+                            <property name="margin-end">12</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-top">12</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwActionRow" id="appid_row">
+                        <property name="subtitle">-</property>
+                        <property name="title">App ID</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwActionRow" id="length_row">
+                        <property name="subtitle">-</property>
+                        <property name="title">Length</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwActionRow" id="resolution_row">
+                        <property name="subtitle">-</property>
+                        <property name="title">Resolution</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwActionRow" id="path_row">
+                        <property name="accessible-role">link</property>
+                        <property name="activatable">True</property>
+                        <property name="subtitle">-</property>
+                        <property name="title">Path</property>
+                        <signal name="activated" handler="handle_open_path" swapped="True"/>
+                        <child type="suffix">
+                          <object class="GtkImage">
+                            <property name="icon-name">folder-open-symbolic</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

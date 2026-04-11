@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<!DOCTYPE cambalache-project SYSTEM "cambalache-project.dtd">
+<!-- Created with Cambalache 1.0 -->
+<cambalache-project version="1.0.0" target_tk="gtk-4.0" depends="libadwaita-1">
+  <ui template-class="SceClipDetail" filename="clip_detail.ui" sha256="ac8feff87fa25543ffcb4a492a2ec731c08e341274129223901b1f0b547bcc19"/>
+  <ui template-class="SceApplicationWindow" filename="window.ui" sha256="e36f851c0b4fa69c88f4c9b333d921aa4a001b8b8ebcc5e3be5ca5935bfa45cd"/>
+</cambalache-project>
