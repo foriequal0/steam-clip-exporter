@@ -61,39 +61,26 @@ mod imp {
         pub fn reload(&self) {
             let steam_root = SteamRoot::new();
 
-            let mut first = None;
-            let list_store = ListStore::new::<ClipInfoObject>();
+            let mut vec = Vec::new();
             for path in steam_root.clip_paths().expect("Failed to get clip paths") {
                 let clip_info = ClipInfo::load(&path).expect("Failed to load clip info");
                 let clip_info_boxed = ClipInfoObject::new(clip_info);
-
-                list_store.append(&clip_info_boxed);
-                if first.is_none() {
-                    first = Some(clip_info_boxed.clone());
-                }
+                vec.push(clip_info_boxed);
             }
 
-            let sorter = CustomSorter::new(move |obj1, obj2| {
-                // Get `IntegerObject` from `glib::Object`
-                let obj1 = obj1
-                    .downcast_ref::<ClipInfoObject>()
-                    .expect("The object needs to be of type `IntegerObject`.");
-                let obj2 = obj2
-                    .downcast_ref::<ClipInfoObject>()
-                    .expect("The object needs to be of type `IntegerObject`.");
+            // Sort timestamp decreasing order
+            vec.sort_by(|x, y| x.value().timestamp.cmp(&y.value().timestamp).reverse());
 
-                // Get property "number" from `IntegerObject`
-                let timestamp1 = obj1.value().timestamp;
-                let timestamp2 = obj2.value().timestamp;
-
-                // Reverse sorting order -> large numbers come first
-                timestamp2.cmp(&timestamp1).into()
-            });
-
-            let sorted_model = SortListModel::new(Some(list_store), Some(sorter));
+            let list_store = {
+                let mut list_store = ListStore::builder()
+                    .item_type(ClipInfoObject::static_type())
+                    .build();
+                list_store.extend_from_slice(&vec);
+                list_store
+            };
 
             self.clip_list_group.bind_model(
-                Some(&sorted_model),
+                Some(&list_store),
                 clone!(
                     #[strong(rename_to=obj)]
                     self.obj(),
@@ -105,8 +92,8 @@ mod imp {
                 ),
             );
 
-            if let Some(first) = first {
-                self.set_clip_info(&first);
+            if let Some(first) = vec.first() {
+                self.set_clip_info(first);
             }
         }
 
