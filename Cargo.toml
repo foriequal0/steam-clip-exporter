@@ -7,7 +7,6 @@ edition = "2024"
 adw = { workspace = true }
 gtk = { workspace = true }
 exporter-core = { path = "./crates/core" }
-xdg = { workspace = true }
 
 [build-dependencies]
 glib-build-tools = { workspace = true }

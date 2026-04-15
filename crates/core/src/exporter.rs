@@ -1,13 +1,12 @@
 use std::path::Path;
 use std::process::Command;
 
-pub fn vlc(session: &Path, dst: &Path) -> Result<(), std::io::Error> {
-    let mut child = Command::new("cvlc")
+pub fn ffmpeg(session: &Path, dst: &Path) -> Result<(), std::io::Error> {
+    let mut child = Command::new("ffmpeg")
+        .arg("-y")
+        .arg("-i")
         .arg(session)
-        .arg("--play-and-exit")
-        .arg("--sout")
-        .arg("#std{access=file,mux=mp4}")
-        .arg("--sout-standard-dst")
+        .args(["-codec", "copy"])
         .arg(dst)
         .spawn()?;
     child.wait()?;

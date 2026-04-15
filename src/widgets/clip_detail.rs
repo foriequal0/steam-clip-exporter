@@ -131,9 +131,10 @@ mod imp {
                             return Err(ExportError::Error("Invalid path".to_string()));
                         };
 
-                        let result =
-                            gio::spawn_blocking(move || exporter_core::exporter::vlc(&mpd, &path))
-                                .await;
+                        let result = gio::spawn_blocking(move || {
+                            exporter_core::exporter::ffmpeg(&mpd, &path)
+                        })
+                        .await;
 
                         match result {
                             Ok(Ok(_)) => Ok(file),

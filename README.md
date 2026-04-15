@@ -21,7 +21,7 @@ This tool is a workaround for these issues.
 
 1. [Rust compiler](https://rustup.rs/)
 2. [gtk-rs development libraries](https://gtk-rs.org/gtk4-rs/stable/latest/book/installation_linux.html)
-3. `cvlc` (for debian/ubuntu, it's in `vlc-bin` package)
+3. `ffmpeg`
 
 ### Build and run
 
@@ -40,6 +40,6 @@ cargo run
 * [ ] handle more cases
   * [ ] background recording
   * [ ] unknown fields
-* [ ] packaging 
+* [ ] packaging
   * [ ] deb
   * [ ] flatpak
