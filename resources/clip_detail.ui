@@ -2,8 +2,8 @@
 <!-- Created with Cambalache 1.0 -->
 <interface>
   <!-- interface-name clip_detail.ui -->
-  <requires lib="gtk" version="4.10"/>
-  <requires lib="libadwaita" version="1.0"/>
+  <requires lib="gtk" version="4.20"/>
+  <requires lib="libadwaita" version="1.8"/>
   <template class="SceClipDetail" parent="GtkBox">
     <child>
       <object class="AdwToastOverlay" id="toast_overlay">

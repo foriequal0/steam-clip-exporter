@@ -27,7 +27,7 @@ mod imp {
     use glib::subclass::InitializingObject;
     use glib::{DateTime, GString, Object, clone};
     use gtk::gio::ActionEntry;
-    use gtk::{CompositeTemplate, CustomSorter, Image, SortListModel};
+    use gtk::{CompositeTemplate, Image};
     use gtk::{gio, glib};
 
     use crate::clip_info_boxed::ClipInfoObject;
@@ -72,7 +72,7 @@ mod imp {
             vec.sort_by(|x, y| x.value().timestamp.cmp(&y.value().timestamp).reverse());
 
             let list_store = {
-                let mut list_store = ListStore::builder()
+                let list_store = ListStore::builder()
                     .item_type(ClipInfoObject::static_type())
                     .build();
                 list_store.extend_from_slice(&vec);
