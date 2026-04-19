@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Steam Clip Exporter
+Type=Application
+Exec=steam-clip-exporter
+Icon=io.github.foriequal0.SteamClipExporter
+Categories=Utility;
