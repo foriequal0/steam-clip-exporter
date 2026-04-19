@@ -3,6 +3,5 @@
   <gresource prefix="/io/github/foriequal0/steam-clip-exporter/">
     <file compressed="true" preprocess="xml-stripblanks">window.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">clip_detail.ui</file>
-    <file compressed="true" preprocess="xml-stripblanks">style.css</file>
   </gresource>
 </gresources>
