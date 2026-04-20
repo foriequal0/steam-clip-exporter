@@ -22,10 +22,12 @@ mod imp {
     use gio::{Cancellable, File};
     use glib::subclass::InitializingObject;
     use glib::{DateTime, GString, Properties, gformat};
+    use gtk::gio::ListStore;
     use gtk::glib::clone;
     use gtk::subclass::prelude::*;
     use gtk::{
-        CompositeTemplate, FileDialog, FileLauncher, Picture, TemplateChild, Widget, Window,
+        CompositeTemplate, FileDialog, FileFilter, FileLauncher, Picture, TemplateChild, Widget,
+        Window,
     };
     use gtk::{gio, glib};
     use std::cell::{OnceCell, RefCell};
@@ -107,6 +109,14 @@ mod imp {
                 Error(String),
             }
 
+            let filters = {
+                let filter = FileFilter::new();
+                filter.add_mime_type("video/mp4");
+                let filters = ListStore::new::<FileFilter>();
+                filters.append(&filter);
+                filters
+            };
+
             let result = self
                 .with_lock_ui(clone!(
                     #[strong]
@@ -116,6 +126,7 @@ mod imp {
                             let mut builder = FileDialog::builder()
                                 .title("Export as")
                                 .initial_name(format!("{title}.mp4"))
+                                .filters(&filters)
                                 .modal(true);
                             if let Some(video) = get_video_dir() {
                                 builder = builder.initial_folder(&video);

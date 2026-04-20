@@ -10,11 +10,25 @@ pub fn get_default_steam_root_dir() -> PathBuf {
         return PathBuf::from(&steam_root);
     }
 
-    if let Ok(home) = std::env::var("HOME") {
-        return PathBuf::from(home).join(".local/share/Steam");
-    }
+    get_default_steam_root_dir_impl()
+}
 
-    panic!("environment variable $HOME is not set");
+fn get_default_steam_root_dir_impl() -> PathBuf {
+    cfg_select! {
+        target_os = "windows" => {
+            return PathBuf::from("C:/Program Files (x86)/Steam");
+        }
+        target_os = "linux" => {
+            if let Ok(home) = std::env::var("HOME") {
+                return PathBuf::from(home).join(".local/share/Steam");
+            }
+
+            panic!("environment variable $HOME is not set");
+        }
+        _ => {
+            compile_error!("Unsupported platform: {}", std::env::consts::OS);
+        }
+    }
 }
 
 pub struct SteamRoot {
