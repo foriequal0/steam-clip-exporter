@@ -20,4 +20,3 @@ members = [
 adw = { version = "0.9.1", package = "libadwaita", features = ["v1_8"] }
 gtk = { version = "0.11.1", package = "gtk4", features = ["v4_12"] }
 glib-build-tools = "0.22.0"
-xdg = "3.0.0"

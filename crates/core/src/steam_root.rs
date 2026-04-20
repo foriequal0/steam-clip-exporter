@@ -4,15 +4,17 @@ use std::path::{Ancestors, Path, PathBuf};
 use crate::proto::Video;
 use eyre::{Context, Result, eyre};
 use glob::{Pattern, glob};
-use xdg::BaseDirectories;
 
 pub fn get_default_steam_root_dir() -> PathBuf {
-    let basedirs = BaseDirectories::new();
-    let data_home = basedirs
-        .get_data_home()
-        .expect("environment variable $HOME is not set");
+    if let Ok(steam_root) = std::env::var("STEAM_ROOT") {
+        return PathBuf::from(&steam_root);
+    }
 
-    data_home.join("Steam")
+    if let Ok(home) = std::env::var("HOME") {
+        return PathBuf::from(home).join(".local/share/Steam");
+    }
+
+    panic!("environment variable $HOME is not set");
 }
 
 pub struct SteamRoot {
