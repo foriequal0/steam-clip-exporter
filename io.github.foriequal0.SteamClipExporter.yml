@@ -1,0 +1,29 @@
+app-id: io.github.foriequal0.SteamClipExporter
+command: steam-clip-exporter
+
+runtime: org.gnome.Platform
+runtime-version: '50'
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+
+build-options:
+  append-path: /usr/lib/sdk/rust-stable/bin
+
+finish-args:
+  - --filesystem=home
+  - --device=dri
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+
+modules:
+  - name: steam-clip-exporter
+    buildsystem: meson
+    builddir: true
+    build-options:
+      build-args:
+        - --share=network
+    sources:
+      - type: dir
+        path: ./

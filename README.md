@@ -31,15 +31,19 @@ cd steam-clip-exporter
 cargo run
 ```
 
+If you prefer flatpak,
+```bash
+flatpak-builder --force-clean --user --install-deps-from=flathub --repo=repo --install builddir io.github.foriequal0.SteamClipExporter.yml
+flatpak run io.github.foriequal0.SteamClipExporter
+```
+
 ### TODO
 
 * [ ] export progress bar or spinner
 * [ ] show game title instead of app id
 * [ ] configurations (steam root, window size, etc)
-* [ ] remove vlc dependency?
 * [ ] handle more cases
   * [ ] background recording
   * [ ] unknown fields
 * [ ] packaging
   * [ ] deb
-  * [ ] flatpak
