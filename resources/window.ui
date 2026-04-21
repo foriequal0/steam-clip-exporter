@@ -2,6 +2,7 @@
 <!-- Created with Cambalache 1.0 -->
 <interface>
   <!-- interface-name window.ui -->
+  <requires lib="gio" version="2.0"/>
   <requires lib="gtk" version="4.20"/>
   <requires lib="libadwaita" version="1.8"/>
   <menu id="primary_menu">
@@ -52,7 +53,7 @@
               </object>
             </property>
             <property name="max-sidebar-width">500.0</property>
-            <property name="min-sidebar-width">400.0</property>
+            <property name="min-sidebar-width">350.0</property>
             <property name="show-content">True</property>
             <property name="sidebar">
               <object class="AdwNavigationPage">
@@ -83,6 +84,7 @@
                 </child>
               </object>
             </property>
+            <property name="sidebar-width-fraction">0.4</property>
           </object>
         </child>
       </object>
@@ -93,7 +95,7 @@
     <child>
       <object class="AdwBreakpoint">
         <!-- Custom object fragments -->
-        <condition>max-width: 700sp</condition>
+        <condition>max-width: 800sp</condition>
         <setter object="split_view" property="collapsed">True</setter>
       </object>
     </child>

@@ -17,6 +17,7 @@ impl ClipDetail {
 
 mod imp {
     use crate::clip_info_boxed::ClipInfoObject;
+    use crate::widgets::fit_to_width_widget::FitToWidthWidget;
     use adw::prelude::*;
     use exporter_core::clip_info::ClipResolution;
     use gio::{Cancellable, File};
@@ -82,9 +83,11 @@ mod imp {
             _ = self.clip_info.set(clip_info.clone());
 
             let clip_info = clip_info.value();
-            self.thumbnail_bin.set_child(Some(&Picture::for_filename(
-                clip_info.clip_path.thumbnail_jpg().as_path(),
-            )));
+
+            let bin = FitToWidthWidget::new();
+            Picture::for_filename(clip_info.clip_path.thumbnail_jpg().as_path()).set_parent(&bin);
+
+            self.thumbnail_bin.set_child(Some(&bin));
             self.group.set_title(&clip_info.title);
             self.group
                 .set_description(Some(&format_timestamp(clip_info.timestamp)));
