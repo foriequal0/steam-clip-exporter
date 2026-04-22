@@ -1,10 +1,11 @@
 use std::path::PathBuf;
 
-use eyre::{Context, Result, eyre};
-use prost::Message;
-
+use crate::SteamRoot;
+use crate::librarycache::try_get_app_name;
 use crate::proto::Clip;
 use crate::steam_root::ClipPath;
+use eyre::{Context, Result, eyre};
+use prost::Message;
 
 #[derive(Debug)]
 pub struct ClipInfo {
@@ -13,6 +14,7 @@ pub struct ClipInfo {
     pub title: String,
     pub timestamp: i32,
     pub appid: String,
+    pub app_name: Option<String>,
     pub length_ms: Option<i32>,
     pub resolution: ClipResolution,
 }
@@ -24,8 +26,8 @@ pub struct ClipResolution {
 }
 
 impl ClipInfo {
-    pub fn load(clip_path: &ClipPath) -> Result<ClipInfo> {
-        fn load(clip_path: &ClipPath) -> Result<ClipInfo> {
+    pub fn load(steam_root: &SteamRoot, clip_path: &ClipPath) -> Result<ClipInfo> {
+        fn load(steam_root: &SteamRoot, clip_path: &ClipPath) -> Result<ClipInfo> {
             let pb = std::fs::read(clip_path.clip_pb())
                 .with_context(|| eyre!("Failed to read clip file",))?;
 
@@ -52,12 +54,16 @@ impl ClipInfo {
                 clip_path.session_mpd(&video)
             };
 
+            let appid = proto.appid.to_string();
+            let app_name = try_get_app_name(steam_root, &appid).ok();
+
             Ok(ClipInfo {
                 clip_path: clip_path.clone(),
                 title,
                 session_mpd,
                 timestamp: proto.timestamp,
-                appid: proto.appid.to_string(),
+                appid,
+                app_name,
                 length_ms,
                 resolution: ClipResolution {
                     width: proto.width,
@@ -66,7 +72,7 @@ impl ClipInfo {
             })
         }
 
-        load(clip_path)
+        load(steam_root, clip_path)
             .with_context(|| eyre!("Failed to load clip info in {}", clip_path.clip_id()))
     }
 }

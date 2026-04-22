@@ -2,6 +2,6 @@
 <!DOCTYPE cambalache-project SYSTEM "cambalache-project.dtd">
 <!-- Created with Cambalache 1.0 -->
 <cambalache-project version="1.0.0" target_tk="gtk-4.0" depends="libadwaita-1">
-  <ui template-class="SceClipDetail" filename="clip_detail.ui" sha256="71d6ffbd5138042efedfc4c74671601ccf44acb1eb9964517e0ee8eb314919dc"/>
+  <ui template-class="SceClipDetail" filename="clip_detail.ui" sha256="0796c2a4bbb10853e25fe27904b8f7dbc18b60d175ee8950de1d9acf24074bf1"/>
   <ui template-class="SceApplicationWindow" filename="window.ui" sha256="85bcedd7802ccf77d5ce8293e3e1f7aa3f65ce2407a40bc4b02b77067b80ec34"/>
 </cambalache-project>

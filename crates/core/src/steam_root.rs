@@ -41,6 +41,14 @@ impl SteamRoot {
         Self { root }
     }
 
+    pub fn root(&self) -> &Path {
+        &self.root
+    }
+
+    pub fn join(&self, path: impl AsRef<Path>) -> PathBuf {
+        self.root.join(path.as_ref())
+    }
+
     pub fn clip_paths(&self) -> Result<Vec<ClipPath>> {
         let Some(root) = self.root.to_str() else {
             return Err(eyre!("Steam root contains non-utf8 characters"));

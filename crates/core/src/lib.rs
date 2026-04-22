@@ -6,6 +6,7 @@
 
 pub mod clip_info;
 pub mod exporter;
+mod librarycache;
 mod proto;
 mod steam_root;
 

@@ -43,7 +43,7 @@ mod imp {
         #[template_child]
         thumbnail_bin: TemplateChild<adw::Bin>,
         #[template_child]
-        appid_row: TemplateChild<adw::ActionRow>,
+        game_row: TemplateChild<adw::ActionRow>,
         #[template_child]
         length_row: TemplateChild<adw::ActionRow>,
         #[template_child]
@@ -91,7 +91,10 @@ mod imp {
             self.group.set_title(&clip_info.title);
             self.group
                 .set_description(Some(&format_timestamp(clip_info.timestamp)));
-            self.appid_row.set_subtitle(&clip_info.appid);
+            self.game_row.set_subtitle(&{
+                let app_name = clip_info.app_name.as_deref().unwrap_or("<unknown>");
+                format!("{} ({})", app_name, clip_info.appid)
+            });
             self.length_row
                 .set_subtitle(&format_length_ms(clip_info.length_ms));
             self.resolution_row

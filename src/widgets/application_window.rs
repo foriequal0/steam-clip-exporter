@@ -63,7 +63,8 @@ mod imp {
 
             let mut vec = Vec::new();
             for path in steam_root.clip_paths().expect("Failed to get clip paths") {
-                let clip_info = ClipInfo::load(&path).expect("Failed to load clip info");
+                let clip_info =
+                    ClipInfo::load(&steam_root, &path).expect("Failed to load clip info");
                 let clip_info_boxed = ClipInfoObject::new(clip_info);
                 vec.push(clip_info_boxed);
             }
