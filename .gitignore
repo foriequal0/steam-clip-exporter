@@ -1,4 +1,13 @@
-/target
+# rust default build target dir
+/target/
 
+# flatpak default build target dir
+/.flatpak-builder/
+/repo/
+
+# meson default build target dir
+/build/
+
+# IDEs
 .idea/
 .vscode/
