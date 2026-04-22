@@ -1,7 +1,11 @@
 project('SteamClipExporter', 'rust')
 
 application_id = 'io.github.foriequal0.SteamClipExporter'
-output_name = 'steam-clip-exporter'
+target_name = 'steam-clip-exporter'
+output_name = target_name
+if host_machine.system() == 'windows'
+    output_name = output_name + '.exe'
+endif
 
 dependency('gtk4', version : '>= 4.20')
 dependency('libadwaita-1', version : '>= 1.8.0')
@@ -22,7 +26,7 @@ cargo_common_args = [
 ]
 
 custom_target(
-  output_name,
+  target_name,
   command : [
     python, files('build-aux/cargo-build-artifact-dir-shim.py'), '--output', target_dir / profile / output_name,
     cargo, 'build', cargo_common_args, '--artifact-dir', '@OUTDIR@',
@@ -41,10 +45,12 @@ test('cargo_test',
      workdir : meson.project_source_root(),
 )
 
-gnome.post_install(
-    gtk_update_icon_cache: true,
-    update_desktop_database : true,
-)
+if host_machine.system() == 'linux'
+    gnome.post_install(
+        gtk_update_icon_cache: true,
+        update_desktop_database : true,
+    )
+endif
 
 meson.add_dist_script(
   python,
