@@ -110,11 +110,6 @@ mod imp {
             let title = clip_info.title.clone();
             let mpd = clip_info.session_mpd.clone();
 
-            enum ExportError {
-                Cancelled,
-                Error(String),
-            }
-
             let filters = {
                 let filter = FileFilter::new();
                 filter.add_mime_type("video/mp4");
@@ -123,44 +118,49 @@ mod imp {
                 filters
             };
 
-            let result = self
-                .with_lock_ui(clone!(
-                    #[strong]
-                    nearest_window,
-                    async move || {
-                        let dialog = {
-                            let mut builder = FileDialog::builder()
-                                .title("Export as")
-                                .initial_name(format!("{title}.mp4"))
-                                .filters(&filters)
-                                .modal(true);
-                            if let Some(video) = get_video_dir() {
-                                builder = builder.initial_folder(&video);
-                            }
-                            builder.build()
-                        };
+            let dialog = {
+                let mut builder = FileDialog::builder()
+                    .title("Export as")
+                    .initial_name(format!("{title}.mp4"))
+                    .filters(&filters)
+                    .modal(true);
+                if let Some(video) = get_video_dir() {
+                    builder = builder.initial_folder(&video);
+                }
+                builder.build()
+            };
 
-                        let Ok(file) = dialog.save_future(nearest_window.as_ref()).await else {
-                            return Err(ExportError::Cancelled);
-                        };
+            enum ExportError {
+                Cancelled,
+                Error(String),
+            }
 
-                        let Some(path) = file.path() else {
-                            return Err(ExportError::Error("Invalid path".to_string()));
-                        };
+            let result = clone!(
+                #[strong]
+                nearest_window,
+                async move || {
+                    let _guard = self.lock_ui();
+                    let Ok(file) = dialog.save_future(nearest_window.as_ref()).await else {
+                        return Err(ExportError::Cancelled);
+                    };
 
-                        let result = gio::spawn_blocking(move || {
-                            exporter_core::exporter::ffmpeg(&mpd, &path)
-                        })
-                        .await;
+                    let Some(path) = file.path() else {
+                        return Err(ExportError::Error("Invalid path".to_string()));
+                    };
 
-                        match result {
-                            Ok(Ok(_)) => Ok(file),
-                            Ok(Err(err)) => Err(ExportError::Error(err.to_string())),
-                            Err(_) => Err(ExportError::Error("Unknown error: ".to_string())),
-                        }
+                    let result =
+                        gio::spawn_blocking(move || exporter_core::exporter::ffmpeg(&mpd, &path))
+                            .await;
+
+                    match result {
+                        Ok(Ok(_)) => Ok(file),
+                        Ok(Err(err)) => Err(ExportError::Error(err.to_string())),
+                        Err(_) => Err(ExportError::Error("Unknown error: ".to_string())),
                     }
-                ))
-                .await;
+                }
+            )()
+            .await;
+
             match result {
                 Ok(exported) => {
                     let toast = adw::Toast::builder()
@@ -192,18 +192,32 @@ mod imp {
             self.toast_overlay.add_toast(toast);
         }
 
-        async fn with_lock_ui<F, Fut>(&self, f: F) -> Fut::Output
-        where
-            F: FnOnce() -> Fut,
-            Fut: Future,
-        {
-            let obj = self.obj();
-            _ = obj.activate_action("win.lock-ui", Some(&true.to_variant()));
+        fn lock_ui(&self) -> LockUiGuard {
+            LockUiGuard::new(&self.obj())
+        }
+    }
 
-            let result = f().await;
+    pub struct LockUiGuard {
+        obj: super::ClipDetail,
+    }
 
-            _ = obj.activate_action("win.lock-ui", Some(&true.to_variant()));
-            result
+    impl LockUiGuard {
+        fn new(obj: &super::ClipDetail) -> Self {
+            let guard = Self { obj: obj.clone() };
+            guard.toggle_lock(true);
+            guard
+        }
+
+        fn toggle_lock(&self, lock: bool) {
+            _ = self
+                .obj
+                .activate_action("win.lock-ui", Some(&lock.to_variant()));
+        }
+    }
+
+    impl Drop for LockUiGuard {
+        fn drop(&mut self) {
+            self.toggle_lock(false);
         }
     }
 
@@ -265,12 +279,17 @@ mod imp {
     }
 
     fn get_video_dir() -> Option<File> {
-        let home = std::env::var("HOME").ok()?;
+        if let Some(videos) = std::env::var("XDG_VIDEOS_DIR").ok() {
+            return Some(File::for_path(&videos));
+        }
 
-        let mut path_buf = PathBuf::from(home);
-        path_buf.push("Videos");
+        if let Some(home) = std::env::var("HOME").ok() {
+            let mut path_buf = PathBuf::from(home);
+            path_buf.push("Videos");
+            return Some(File::for_path(&path_buf));
+        }
 
-        Some(File::for_path(&path_buf))
+        None
     }
 
     #[glib::object_subclass]

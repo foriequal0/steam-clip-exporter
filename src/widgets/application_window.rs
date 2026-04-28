@@ -49,10 +49,10 @@ mod imp {
             let action = ActionEntry::builder("lock-ui")
                 .parameter_type(Some(&bool::static_variant_type()))
                 .activate(move |window: &super::ApplicationWindow, _, parameter| {
-                    let parameter = parameter
+                    let lock = parameter
                         .and_then(|x| x.get::<bool>())
                         .expect("bool type parameter should be given");
-                    window.set_focusable(parameter);
+                    window.set_sensitive(!lock);
                 })
                 .build();
             self.obj().add_action_entries([action]);
