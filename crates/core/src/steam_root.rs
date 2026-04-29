@@ -1,9 +1,11 @@
-use std::ffi::OsStr;
-use std::path::{Ancestors, Path, PathBuf};
-
 use crate::proto::Video;
 use eyre::{Context, Result, eyre};
 use glob::{Pattern, glob};
+use regex::Regex;
+use std::ffi::OsStr;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+use std::path::{Ancestors, Path, PathBuf};
 
 pub fn get_default_steam_root_dir() -> PathBuf {
     if let Ok(steam_root) = std::env::var("STEAM_ROOT") {
@@ -16,7 +18,7 @@ pub fn get_default_steam_root_dir() -> PathBuf {
 fn get_default_steam_root_dir_impl() -> PathBuf {
     cfg_select! {
         target_os = "windows" => {
-            return PathBuf::from("C:/Program Files (x86)/Steam");
+            PathBuf::from("C:/Program Files (x86)/Steam")
         }
         target_os = "linux" => {
             if let Ok(home) = std::env::var("HOME") {
@@ -49,16 +51,135 @@ impl SteamRoot {
         self.root.join(path.as_ref())
     }
 
-    pub fn clip_paths(&self) -> Result<Vec<ClipPath>> {
+    pub fn userdata_dir_path(&self) -> PathBuf {
+        self.root.join("userdata")
+    }
+
+    pub fn localconfig_paths(&self) -> Result<Vec<PathBuf>> {
         let Some(root) = self.root.to_str() else {
             return Err(eyre!("Steam root contains non-utf8 characters"));
         };
 
-        let root = Pattern::escape(root);
-        let pattern = format!("{}/userdata/*/gamerecordings/clips/*/clip.pb", root);
-
         let mut result = Vec::new();
+        let root = Pattern::escape(root);
+        let pattern = format!("{}/userdata/*/config/localconfig.vdf", root);
+        for path in glob(&pattern).context("Failed to glob")?.flatten() {
+            result.push(path);
+        }
 
+        Ok(result)
+    }
+}
+
+pub struct GameRecordingsRoots {
+    roots: Vec<GameRecordingsRoot>,
+}
+
+impl GameRecordingsRoots {
+    pub fn read_from_localconfig_paths(
+        paths: impl IntoIterator<Item = impl AsRef<Path>>,
+    ) -> Result<Self> {
+        let mut roots = Vec::new();
+        for path in paths {
+            if let Ok(root) = GameRecordingsRoot::read_from_localconfig(path.as_ref()) {
+                roots.push(root);
+            }
+        }
+        Ok(Self { roots })
+    }
+
+    pub fn clips_dir_paths(&self) -> Result<Vec<PathBuf>> {
+        let mut result = Vec::new();
+        for root in &self.roots {
+            result.push(root.clips_dir_path());
+        }
+        Ok(result)
+    }
+
+    pub fn clip_paths(&self) -> Result<Vec<ClipPath>> {
+        let mut result = Vec::new();
+        for root in &self.roots {
+            let paths = root.clip_paths()?;
+            result.extend(paths);
+        }
+
+        Ok(result)
+    }
+}
+
+pub struct GameRecordingsRoot {
+    root: PathBuf,
+}
+
+impl GameRecordingsRoot {
+    fn read_from_localconfig(localconfig: &Path) -> Result<Self> {
+        let root = if let Some(manual_path) = parse_localconfig(localconfig)? {
+            PathBuf::from(manual_path)
+        } else {
+            let per_user = localconfig
+                .parent()
+                .expect("config dir")
+                .parent()
+                .expect("per_user");
+            per_user.join("gamerecordings")
+        };
+
+        Ok(Self { root })
+    }
+}
+
+fn parse_localconfig(path: &Path) -> Result<Option<String>> {
+    let regex =
+        Regex::new(r#"^\s*"BackgroundRecordPath"\s*"(?<path>.*?)"\s*$"#).expect("Invalid regex");
+
+    let file = BufReader::new(File::open(path).context("localconfig.vdf")?);
+
+    for line in file.lines() {
+        let line = line?;
+        if let Some(captures) = regex.captures(&line) {
+            let path = captures.name("path").expect("captured").as_str();
+            let unescaped = unescape(path);
+            if unescaped.len() == 0 {
+                break;
+            }
+
+            return Ok(Some(unescaped));
+        }
+    }
+
+    Ok(None)
+}
+
+fn unescape(s: &str) -> String {
+    let mut result = String::new();
+    let mut it = s.chars();
+    while let Some(ch) = it.next() {
+        if ch == '\\' {
+            let sequence = it.next().expect("escape sequence");
+            let unescaped = sequence;
+            // TODO: handle control chars?
+            result.push(unescaped)
+        } else {
+            result.push(ch)
+        }
+    }
+
+    result
+}
+
+impl GameRecordingsRoot {
+    pub fn clips_dir_path(&self) -> PathBuf {
+        self.root.join("clips")
+    }
+
+    pub fn clip_paths(&self) -> Result<Vec<ClipPath>> {
+        let mut result = Vec::new();
+        let Some(gamerecordings) = self.root.to_str() else {
+            return Err(eyre!("gamerecordings root contains non-utf8 characters"));
+        };
+
+        let gamerecordings = Pattern::escape(gamerecordings);
+        let pattern = format!("{}/clips/*/clip.pb", gamerecordings);
         for path in glob(&pattern).context("Failed to glob")?.flatten() {
             let Ok(file) = ClipPath::try_from(path.as_path()) else {
                 continue;
@@ -130,7 +251,6 @@ impl TryFrom<&Path> for ClipPath {
                 .ok_or_else(|| eyre!("CLIP_ID segment contains non-utf8 characters"))?;
 
             check_segment(&mut ancestors, &"clips")?;
-            check_segment(&mut ancestors, &"gamerecordings")?;
 
             Ok(ClipPath {
                 root: root.to_owned(),

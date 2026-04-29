@@ -4,6 +4,7 @@ use gtk::gio;
 use gtk::glib;
 
 pub mod clip_info_boxed;
+mod utils;
 mod widgets;
 
 use widgets::application_window::ApplicationWindow;

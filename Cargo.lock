@@ -713,6 +713,7 @@ name = "steam-clip-exporter"
 version = "0.1.0"
 dependencies = [
  "exporter-core",
+ "eyre",
  "glib-build-tools",
  "gtk4",
  "libadwaita",

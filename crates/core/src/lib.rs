@@ -12,4 +12,5 @@ mod steam_root;
 
 pub use clip_info::ClipInfo;
 pub use steam_root::ClipPath;
+pub use steam_root::GameRecordingsRoots;
 pub use steam_root::SteamRoot;

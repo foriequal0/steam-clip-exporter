@@ -19,19 +19,22 @@ impl ApplicationWindow {
 }
 
 mod imp {
+    use crate::clip_info_boxed::ClipInfoObject;
+    use crate::utils::watchgroup::WatchGroup;
+    use crate::widgets::clip_detail::ClipDetail;
     use adw::ActionRow;
     use adw::prelude::*;
     use adw::subclass::prelude::*;
-    use exporter_core::{ClipInfo, SteamRoot};
+    use exporter_core::{ClipInfo, GameRecordingsRoots, SteamRoot};
+    use eyre::{Context, Result};
     use gio::ListStore;
     use glib::subclass::InitializingObject;
     use glib::{DateTime, GString, Object, clone};
     use gtk::gio::ActionEntry;
     use gtk::{CompositeTemplate, Image};
     use gtk::{gio, glib};
-
-    use crate::clip_info_boxed::ClipInfoObject;
-    use crate::widgets::clip_detail::ClipDetail;
+    use std::cell::OnceCell;
+    use std::path::PathBuf;
 
     #[derive(CompositeTemplate, Default)]
     #[template(resource = "/io/github/foriequal0/steam-clip-exporter/window.ui")]
@@ -42,6 +45,8 @@ mod imp {
         clip_list_group: TemplateChild<adw::PreferencesGroup>,
         #[template_child]
         content_view: TemplateChild<adw::Bin>,
+
+        watchgroup: OnceCell<WatchGroup>,
     }
 
     impl ApplicationWindow {
@@ -58,11 +63,46 @@ mod imp {
             self.obj().add_action_entries([action]);
         }
 
+        pub fn load(&self) -> Result<()> {
+            let watchgroup = WatchGroup::new(clone!(
+                #[strong(rename_to=obj)]
+                self.obj(),
+                move || {
+                    obj.imp().reload();
+                }
+            ));
+
+            let steam_root = SteamRoot::new();
+            watchgroup.add(&steam_root.userdata_dir_path());
+
+            let localconfigs = steam_root
+                .localconfig_paths()
+                .context("Cannot find localconfig.vdf files")?;
+            watchgroup.extend(&localconfigs);
+
+            let gamerecordings = GameRecordingsRoots::read_from_localconfig_paths(localconfigs)
+                .context("Cannot find gamerecordings dirs")?;
+            watchgroup.extend(&gamerecordings.clips_dir_paths()?);
+
+            _ = self.watchgroup.set(watchgroup);
+            self.reload();
+
+            Ok(())
+        }
+
         pub fn reload(&self) {
             let steam_root = SteamRoot::new();
+            let localconfigs = steam_root
+                .localconfig_paths()
+                .expect("Cannot find localconfig.vdf files");
+            let gamerecordings = GameRecordingsRoots::read_from_localconfig_paths(localconfigs)
+                .expect("Cannot find gamerecordings dirs");
 
             let mut vec = Vec::new();
-            for path in steam_root.clip_paths().expect("Failed to get clip paths") {
+            for path in gamerecordings
+                .clip_paths()
+                .expect("Failed to get clip paths")
+            {
                 let clip_info =
                     ClipInfo::load(&steam_root, &path).expect("Failed to load clip info");
                 let clip_info_boxed = ClipInfoObject::new(clip_info);
@@ -162,7 +202,7 @@ mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             self.register_window_actions();
-            self.reload();
+            self.load().expect("cannot initialize");
         }
     }
 
