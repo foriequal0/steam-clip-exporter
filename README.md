@@ -41,7 +41,6 @@ flatpak run io.github.foriequal0.SteamClipExporter
 ### TODO
 
 * [ ] export progress bar or spinner
-* [ ] show game title instead of app id
 * [ ] configurations (steam root, window size, etc)
 * [ ] handle more cases
     * [ ] background recording
