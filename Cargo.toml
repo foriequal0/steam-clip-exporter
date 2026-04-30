@@ -8,6 +8,9 @@ adw = { workspace = true }
 gtk = { workspace = true }
 exporter-core = { path = "./crates/core" }
 eyre = { workspace = true }
+futures = "0.3.32"
+futures-util = "0.3.32"
+debounced = "0.2.0"
 
 [build-dependencies]
 glib-build-tools = { workspace = true }

@@ -34,7 +34,6 @@ mod imp {
     use gtk::{CompositeTemplate, Image};
     use gtk::{gio, glib};
     use std::cell::OnceCell;
-    use std::path::PathBuf;
 
     #[derive(CompositeTemplate, Default)]
     #[template(resource = "/io/github/foriequal0/steam-clip-exporter/window.ui")]
