@@ -2,7 +2,7 @@
 <!-- Created with Cambalache 1.0 -->
 <interface>
   <!-- interface-name clip_detail.ui -->
-  <requires lib="gtk" version="4.20"/>
+  <requires lib="gtk" version="4.14"/>
   <requires lib="libadwaita" version="1.8"/>
   <template class="SceClipDetail" parent="GtkBox">
     <child>
