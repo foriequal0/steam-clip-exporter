@@ -37,6 +37,12 @@ pub struct SteamRoot {
     root: PathBuf,
 }
 
+impl Default for SteamRoot {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SteamRoot {
     pub fn new() -> Self {
         let root = get_default_steam_root_dir();
@@ -139,7 +145,7 @@ fn parse_localconfig(path: &Path) -> Result<Option<String>> {
         if let Some(captures) = regex.captures(&line) {
             let path = captures.name("path").expect("captured").as_str();
             let unescaped = unescape(path);
-            if unescaped.len() == 0 {
+            if unescaped.is_empty() {
                 break;
             }
 

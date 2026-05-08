@@ -180,7 +180,7 @@ mod imp {
                 }
                 Err(ExportError::Cancelled) => {}
                 Err(ExportError::Error(err)) => {
-                    self.show_error_toast(&format!("Failed to export clip: {}", err.to_string()))
+                    self.show_error_toast(&format!("Failed to export clip: {err}"))
                 }
             }
         }
@@ -279,11 +279,11 @@ mod imp {
     }
 
     fn get_video_dir() -> Option<File> {
-        if let Some(videos) = std::env::var("XDG_VIDEOS_DIR").ok() {
+        if let Ok(videos) = std::env::var("XDG_VIDEOS_DIR") {
             return Some(File::for_path(&videos));
         }
 
-        if let Some(home) = std::env::var("HOME").ok() {
+        if let Ok(home) = std::env::var("HOME") {
             let mut path_buf = PathBuf::from(home);
             path_buf.push("Videos");
             return Some(File::for_path(&path_buf));

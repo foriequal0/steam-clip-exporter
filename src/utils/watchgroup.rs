@@ -20,7 +20,7 @@ impl WatchGroup {
         let (tx, rx) = futures::channel::mpsc::unbounded();
         spawn_future_local(async move {
             let mut debounced = debounced(rx, Duration::from_secs(1));
-            while let Some(_) = debounced.next().await {
+            while debounced.next().await.is_some() {
                 callback();
             }
         });
@@ -34,7 +34,7 @@ impl WatchGroup {
 
     pub fn extend<'a>(&'a self, paths: impl IntoIterator<Item = impl AsRef<Path> + 'a>) {
         for path in paths {
-            _ = self.add(path.as_ref());
+            self.add(path.as_ref());
         }
     }
 

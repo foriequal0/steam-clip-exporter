@@ -51,7 +51,7 @@ impl ClipInfo {
                     .as_ref()
                     .ok_or_else(|| eyre!("Clip timeline video is missing"))?;
 
-                clip_path.session_mpd(&video)
+                clip_path.session_mpd(video)
             };
 
             let appid = proto.appid.to_string();
