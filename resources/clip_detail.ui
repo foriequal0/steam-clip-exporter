@@ -63,7 +63,7 @@
                         <signal name="activated" handler="handle_open_path" swapped="True"/>
                         <child type="suffix">
                           <object class="GtkImage">
-                            <property name="icon-name">folder-open</property>
+                            <property name="icon-name">folder-open-symbolic</property>
                           </object>
                         </child>
                       </object>
