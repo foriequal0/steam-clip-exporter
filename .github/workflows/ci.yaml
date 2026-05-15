@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container: ubuntu:26.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/prepare/linux
+      - name: cargo fetch
+        run: cargo fetch --verbose
+      - id: fmt
+        run: cargo fmt --check --all
+        continue-on-error: true
+      - id: check
+        run: cargo check --frozen --all-targets
+        continue-on-error: true
+      - id: clippy
+        run: cargo clippy --frozen -- -D warnings
+        continue-on-error: true
+      - id: test
+        run: cargo test --all --frozen
+        continue-on-error: true
+      - if: |
+          steps.fmt.outcome != 'success' ||
+          steps.check.outcome != 'success' ||
+          steps.clippy.outcome != 'success' ||
+          steps.test.outcome != 'success'
+        run: |
+          echo "fmt:" "$OUTCOME_FMT";
+          echo "check:" "$OUTCOME_CHECK";
+          echo "clippy:" "$OUTCOME_CLIPPY";
+          echo "test:" "$OUTCOME_TEST";
+          exit 1
+        env:
+          OUTCOME_FMT: ${{steps.fmt.outcome}}
+          OUTCOME_CHECK: ${{steps.check.outcome}}
+          OUTCOME_CLIPPY: ${{steps.clippy.outcome}}
+          OUTCOME_TEST: ${{steps.test.outcome}}
+
+  build:
+    uses: ./.github/workflows/build.yaml

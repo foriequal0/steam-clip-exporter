@@ -1,0 +1,14 @@
+name: prepare/linux
+
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        DEBIAN_FRONTEND=noninteractive apt-get install --update --yes \
+          git curl
+    # re-checkout to make it git repository
+    - uses: actions/checkout@v6
+    - shell: bash
+      run: |
+        bash .github/actions/prepare/linux/install-deps.sh

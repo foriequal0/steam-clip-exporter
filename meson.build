@@ -7,7 +7,7 @@ if host_machine.system() == 'windows'
     output_name = output_name + '.exe'
 endif
 
-dependency('gtk4', version : '>= 4.20')
+dependency('gtk4', version : '>= 4.14')
 dependency('libadwaita-1', version : '>= 1.8.0')
 
 subdir('resources')

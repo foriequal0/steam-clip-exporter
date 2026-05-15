@@ -1,0 +1,16 @@
+name: prepare/msys2
+
+runs:
+  using: "composite"
+  steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: git curl
+        # ISSUE: https://github.com/msys2/setup-msys2/issues/347
+        path-type: 'inherit'
+        msystem: 'UCRT64'
+    # re-checkout to make it git repository
+    - uses: actions/checkout@v6
+    - run: bash .github/actions/prepare/msys2/install-deps.sh
+      shell: msys2 {0}
