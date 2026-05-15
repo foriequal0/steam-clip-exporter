@@ -16,20 +16,24 @@ pub fn get_default_steam_root_dir() -> PathBuf {
 }
 
 fn get_default_steam_root_dir_impl() -> PathBuf {
-    cfg_select! {
-        target_os = "windows" => {
-            PathBuf::from("C:/Program Files (x86)/Steam")
-        }
-        target_os = "linux" => {
-            if let Ok(home) = std::env::var("HOME") {
-                return PathBuf::from(home).join(".local/share/Steam");
-            }
+    // TODO: migrate to cfg_if! if Rust 1.95 is avaliable on all platforms
+    #[cfg(target_os = "windows")]
+    {
+        return PathBuf::from("C:/Program Files (x86)/Steam");
+    }
 
-            panic!("environment variable $HOME is not set");
+    #[cfg(target_os = "linux")]
+    {
+        if let Ok(home) = std::env::var("HOME") {
+            return PathBuf::from(home).join(".local/share/Steam");
         }
-        _ => {
-            compile_error!("Unsupported platform: {}", std::env::consts::OS);
-        }
+
+        panic!("environment variable $HOME is not set");
+    }
+
+    #[cfg(not(any(target_os = "windows", target_os = "linux")))]
+    {
+        compile_error!("Unsupported platform: {}", std::env::consts::OS);
     }
 }
 
