@@ -1,0 +1,13 @@
+Source: steam-clip-exporter
+Section: utils
+Priority: optional
+Maintainer: SeongChan Lee <foriequal@gmail.com>
+Build-Depends: debhelper-compat (= 13), meson, cargo, rustc, python3,
+ libadwaita-1-dev, libgtk-4-dev
+Standards-Version: 4.6.2
+
+Package: steam-clip-exporter
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, libadwaita-1-0, libgtk-4-1
+Description: Alternative Steam Game Recording clip exporter
+ Exports Steam clips without H.264 re-encoding and with H.265 support.

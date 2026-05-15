@@ -1,4 +1,4 @@
-project('SteamClipExporter', 'rust')
+project('SteamClipExporter')
 
 application_id = 'io.github.foriequal0.SteamClipExporter'
 target_name = 'steam-clip-exporter'
